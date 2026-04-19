@@ -7,7 +7,13 @@ const userSchema = new mongoose.Schema({
     isAdmin: { type: Boolean, default: false }, // Admin panel ke liye zaroori
     isVerified: { type: Boolean, default: false }, // OTP verification ke liye
     otp: { type: String }, // 6-digit OTP
-    otpExpires: { type: Date } // OTP expiry time
+    otpExpires: { type: Date }, // OTP expiry time
+    wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product'
+    }
+  ]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

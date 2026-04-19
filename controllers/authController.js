@@ -112,3 +112,63 @@ exports.loginUser = async (req, res) => {
         res.status(500).json({ message: "Server error during login." });
     }
 };
+
+// ==========================================
+// WISHLIST FUNCTIONS (Add, Remove, Get)
+// ==========================================
+
+// 1. Wishlist mein Add karna
+exports.addToWishlist = async (req, res) => {
+    try {
+        const { userId, productId } = req.body;
+        const user = await User.findById(userId);
+        
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Check karo ki product pehle se toh nahi hai
+        if (user.wishlist.includes(productId)) {
+            return res.status(400).json({ message: "Product pehle se wishlist mein hai!" });
+        }
+
+        user.wishlist.push(productId);
+        await user.save();
+        
+        res.status(200).json({ message: "Wishlist mein add ho gaya!", wishlist: user.wishlist });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+// 2. Wishlist se Remove karna
+exports.removeFromWishlist = async (req, res) => {
+    try {
+        const { userId, productId } = req.body;
+        const user = await User.findById(userId);
+        
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Product ID ko wishlist array se nikal do
+        user.wishlist = user.wishlist.filter(id => id.toString() !== productId.toString());
+        await user.save();
+        
+        res.status(200).json({ message: "Wishlist se hat gaya!", wishlist: user.wishlist });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+// 3. User ki Wishlist dekhna
+exports.getWishlist = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        // 'populate' lagane se humein sirf ID nahi, balki poore product ki photo, naam, price sab mil jayega
+        const user = await User.findById(userId).populate('wishlist');
+        
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        res.status(200).json(user.wishlist);
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
